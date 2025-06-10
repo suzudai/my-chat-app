@@ -1,0 +1,23 @@
+{
+  "name": "my-chat-app",
+  "version": "1.0.0",
+  "description": "これは、GoogleのGemini APIを利用したシンプルなチャットアプリケーションです。 開発環境はDockerを使っており、バックエンドとフロントエンドのホットリロードに対応しています。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suzudai/my-chat-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/suzudai/my-chat-app/issues"
+  },
+  "homepage": "https://github.com/suzudai/my-chat-app#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
