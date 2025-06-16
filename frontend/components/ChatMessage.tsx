@@ -6,6 +6,8 @@ import LoadingSpinner from './LoadingSpinner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import CopyIcon from './icons/CopyIcon';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -34,7 +36,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.text}</p>
           ) : (
-            <div className="prose prose-invert max-w-none prose-p:whitespace-pre-wrap prose-headings:text-gray-100 prose-strong:text-gray-100 prose-em:text-gray-300">
+            <div className="prose prose-invert max-w-none prose-p:whitespace-pre-wrap prose-headings:text-gray-100 prose-strong:text-gray-100 prose-em:text-gray-300 prose-code:before:content-[''] prose-code:after:content-['']">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -88,20 +90,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
                     const match = /language-(\w+)/.exec(className || '')
                     return match ? (
-                      <div className="bg-gray-900 rounded-md overflow-hidden">
-                        <div className="text-gray-400 text-xs px-3 py-2 flex items-center justify-between">
-                          <span>{match[1]}</span>
+                      <div className="my-2 text-left">
+                        <div className="text-gray-400 text-xs flex items-center justify-between mb-2">
+                          <span className="italic">{match[1]}</span>
                           <button onClick={handleCopy} className={`flex items-center space-x-1 transition-colors duration-200 ${isCopied ? 'text-green-400' : 'text-gray-400 hover:text-white'}`} disabled={isCopied}>
                             <CopyIcon className="w-4 h-4" />
                             <span>{isCopied ? 'コピーしました' : 'コピーする'}</span>
                           </button>
                         </div>
-                        <pre className="px-3 pb-3 overflow-x-auto text-sm leading-tight m-0">
-                          <code {...props} className={className} style={{margin: 0, padding: 0}}>{children}</code>
-                        </pre>
+                        <SyntaxHighlighter
+                          style={vscDarkPlus}
+                          language={match[1]}
+                          PreTag="div"
+                        >
+                          {String(children).replace(/\\n$/, '')}
+                        </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <code {...props} className={`${className || ''} bg-gray-800 rounded-sm px-1.5 py-0.5 text-red-300`}>
+                      <code className={`${className || ''} bg-gray-800 rounded-sm px-1.5 py-0.5 text-red-300`} {...props}>
                         {children}
                       </code>
                     )
