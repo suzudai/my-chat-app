@@ -5,6 +5,7 @@ import SparklesIcon from './icons/SparklesIcon';
 import LoadingSpinner from './LoadingSpinner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import CopyIcon from './icons/CopyIcon';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -33,20 +34,70 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.text}</p>
           ) : (
-            <div className="prose prose-invert max-w-none prose-p:whitespace-pre-wrap">
+            <div className="prose prose-invert max-w-none prose-p:whitespace-pre-wrap prose-headings:text-gray-100 prose-strong:text-gray-100 prose-em:text-gray-300">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
                   a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300" />,
+                  h1: ({node, ...props}) => <h1 {...props} className="text-3xl font-bold mt-6 mb-4 text-gray-100" />,
+                  h2: ({node, ...props}) => <h2 {...props} className="text-2xl font-bold mt-5 mb-3 text-gray-100" />,
+                  h3: ({node, ...props}) => <h3 {...props} className="text-xl font-bold mt-4 mb-2 text-gray-100" />,
+                  h4: ({node, ...props}) => <h4 {...props} className="text-lg font-bold mt-3 mb-2 text-gray-100" />,
+                  h5: ({node, ...props}) => <h5 {...props} className="text-base font-bold mt-2 mb-1 text-gray-100" />,
+                  h6: ({node, ...props}) => <h6 {...props} className="text-sm font-bold mt-2 mb-1 text-gray-100" />,
+                  ul: ({node, ...props}) => <ul {...props} className="list-disc list-outside pl-6 mb-4 space-y-1" />,
+                  ol: ({node, ...props}) => <ol {...props} className="list-decimal list-outside pl-6 mb-4 space-y-1" />,
+                  li: ({node, children, ...props}) => {
+                    // チェックボックスリスト項目の場合
+                    if (Array.isArray(children) && children.length > 0 && 
+                        typeof children[0] === 'object' && 
+                        children[0] !== null && 
+                        'props' in children[0] && 
+                        children[0].props?.type === 'checkbox') {
+                      return (
+                        <li {...props} className="text-gray-200 flex items-center space-x-2 list-none -ml-6">
+                          {children}
+                        </li>
+                      );
+                    }
+                    return <li {...props} className="text-gray-200">{children}</li>;
+                  },
+                  input: ({node, ...props}) => {
+                    if (props.type === 'checkbox') {
+                      return <input {...props} className="mr-2 h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" />;
+                    }
+                    return <input {...props} />;
+                  },
+                  blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-gray-500 pl-4 my-4 italic text-gray-300" />,
+                  table: ({node, ...props}) => <div className="overflow-x-auto my-4"><table {...props} className="min-w-full border border-gray-600" /></div>,
+                  th: ({node, ...props}) => <th {...props} className="border border-gray-600 px-3 py-2 bg-gray-700 font-bold text-gray-100" />,
+                  td: ({node, ...props}) => <td {...props} className="border border-gray-600 px-3 py-2 text-gray-200" />,
+                  p: ({node, ...props}) => <p {...props} className="mb-3 text-gray-200" />,
+                  hr: ({node, ...props}) => <hr {...props} className="my-6 border-gray-600" />,
                   code({node, className, children, ...props}) {
+                    const [isCopied, setIsCopied] = React.useState(false);
+
+                    const handleCopy = () => {
+                      if (!children) return;
+                      const codeToCopy = String(children).replace(/\\n$/, '');
+                      navigator.clipboard.writeText(codeToCopy).then(() => {
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      });
+                    };
+
                     const match = /language-(\w+)/.exec(className || '')
                     return match ? (
-                      <div className="bg-gray-800 rounded-md my-2">
-                        <div className="bg-gray-900 text-gray-400 text-xs px-3 py-1 rounded-t-md">
-                          {match[1]}
+                      <div className="bg-gray-900 rounded-md overflow-hidden">
+                        <div className="text-gray-400 text-xs px-3 py-2 flex items-center justify-between">
+                          <span>{match[1]}</span>
+                          <button onClick={handleCopy} className={`flex items-center space-x-1 transition-colors duration-200 ${isCopied ? 'text-green-400' : 'text-gray-400 hover:text-white'}`} disabled={isCopied}>
+                            <CopyIcon className="w-4 h-4" />
+                            <span>{isCopied ? 'コピーしました' : 'コピーする'}</span>
+                          </button>
                         </div>
-                        <pre className="p-3 overflow-x-auto text-sm">
-                          <code {...props} className={className}>{children}</code>
+                        <pre className="px-3 pb-3 overflow-x-auto text-sm leading-tight m-0">
+                          <code {...props} className={className} style={{margin: 0, padding: 0}}>{children}</code>
                         </pre>
                       </div>
                     ) : (
