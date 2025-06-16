@@ -36,6 +36,11 @@ const Layout: React.FC = () => {
                     </Link>
                 </li>
                 <li>
+                    <Link to="/langchain-chat" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        LangChain Chat
+                    </Link>
+                </li>
+                <li>
                     <Link to="/about" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                         About
                     </Link>

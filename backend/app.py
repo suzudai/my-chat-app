@@ -6,6 +6,13 @@ import google.generativeai as genai
 import uvicorn
 from dotenv import load_dotenv
 
+# このファイルのディレクトリを取得
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# １つ上の階層のディレクトリ（プロジェクトルート）を取得
+project_root = os.path.dirname(current_dir)
+# 静的ファイルディレクトリのパスを作成
+static_file_dir = os.path.join(project_root, "backend/static")
+
 # routersからchatルーターをインポート
 from routers import chat
 from routers import new_api
@@ -30,21 +37,15 @@ app.include_router(new_api.router, prefix="/api/new")
 app.include_router(chat_langchain.router, prefix="/api/langchain")
 
 # Viteによってビルドされた静的ファイルを配信します。
-# 'static' ディレクトリを '/assets' パスにマウントします。
-# Viteのビルド設定(vite.config.ts)で 'assetsDir' を変更していない場合、
-# JavaScriptやCSSファイルは 'assets' ディレクトリ内に生成されます。
-app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+app.mount("/assets", StaticFiles(directory=os.path.join(static_file_dir, "assets")), name="assets")
 
 # SPA (Single Page Application) のためのキャッチオールルート
-# APIでも静的ファイルでもない他のすべてのパスリクエストに対して
-# フロントエンドのメインのHTMLファイル (index.html) を返します。
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
     """
-    Vue/Reactなどのフロントエンドアプリケーションをホストするためのフォールバック。
-    存在しないパスへのリクエストに対して index.html を返します。
+    フロントエンドアプリケーションをホストするためのフォールバック。
     """
-    return FileResponse("static/index.html")
+    return FileResponse(os.path.join(static_file_dir, "index.html"))
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
