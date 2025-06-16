@@ -42,6 +42,14 @@ async def chat(request: ChatRequest):
 1. 番号付きリスト1
 2. 番号付きリスト2
 ---
+```bash
+echo "Hello, World!"
+```
+`aa`tesuto\n\n
+'bb'tesuto\n\n
+"cc"tesuto\n\n
+
+---
 ```python
 def greet():
     return f"Hello!"
