@@ -20,7 +20,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ models, selectedModelId, 
       >
         <option value="" disabled>Select a model</option>
         {models.map((model) => (
-          <option key={model.id} value={model.id}>
+          <option key={model.id} value={model.id} disabled={model.disabled} className={model.disabled ? "text-gray-500" : ""}>
             {model.name}
           </option>
         ))}

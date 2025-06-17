@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import SparklesIcon from '../components/icons/SparklesIcon';
 import { Model } from '../types';
@@ -11,13 +11,41 @@ export interface OutletContextProps {
 }
 
 const Layout: React.FC = () => {
-  const [models] = useState<Model[]>([
-    { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash" },
-    { id: "gemma-3-27b-it", name: "Gemma 3 (37B)" },
-    { id: "gemma-3n-e4b-it", name: "Gemma 3N (E4B)" },
-  ]);
-  const [selectedModelId, setSelectedModelId] = useState<string>("gemini-1.5-flash");
+  const [models, setModels] = useState<Model[]>([]);
+  const [selectedModelId, setSelectedModelId] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('/api/langchain/models');
+        if (!response.ok) {
+          throw new Error('Failed to fetch models');
+        }
+        const data: Model[] = await response.json();
+        setModels(data);
+        if (data.length > 0) {
+          setSelectedModelId(data[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching models:", error);
+        // ここでエラーハンドリングをすることもできます（例：エラーメッセージを表示）
+      }
+    };
+    fetchModels();
+  }, []);
+
+  const modelsForSelector = useMemo(() => {
+    if (location.pathname === '/langchain-chat') {
+      const disabledModels = ["gemma-3-27b-it", "gemma-3n-e4b-it"];
+      return models.map(model => ({
+        ...model,
+        disabled: disabledModels.includes(model.id),
+      }));
+    }
+    return models;
+  }, [models, location.pathname]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100 font-sans">
@@ -31,29 +59,29 @@ const Layout: React.FC = () => {
         <div className="flex items-center space-x-4">
             <ul className="flex space-x-4 items-center">
                 <li>
-                    <Link to="/" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <NavLink to="/" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`} end>
                         Chat
-                    </Link>
+                    </NavLink>
                 </li>
                 <li>
-                    <Link to="/langchain-chat" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <NavLink to="/langchain-chat" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
                         LangChain Chat
-                    </Link>
+                    </NavLink>
                 </li>
                 <li>
-                    <Link to="/about" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <NavLink to="/about" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
                         About
-                    </Link>
+                    </NavLink>
                 </li>
                 <li>
-                    <Link to="/new-page" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <NavLink to="/new-page" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
                         New Page
-                    </Link>
+                    </NavLink>
                 </li>
             </ul>
             <div className="w-64">
                 <ModelSelector
-                    models={models}
+                    models={modelsForSelector}
                     selectedModelId={selectedModelId}
                     onModelChange={setSelectedModelId}
                     disabled={isLoading}
