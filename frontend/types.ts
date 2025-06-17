@@ -10,4 +10,5 @@ export interface ChatMessage {
 export interface Model {
   id: string;
   name: string;
+  disabled?: boolean;
 }

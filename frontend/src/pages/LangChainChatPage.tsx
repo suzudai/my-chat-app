@@ -7,7 +7,7 @@ import ErrorMessage from '../../components/ErrorMessage';
 import { OutletContextProps } from '../../src/Layout';
 
 const LangChainChatPage: React.FC = () => {
-  const { isLoading, setIsLoading } = useOutletContext<OutletContextProps>();
+  const { selectedModelId, isLoading, setIsLoading } = useOutletContext<OutletContextProps>();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ const LangChainChatPage: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userInput }),
+        body: JSON.stringify({ message: userInput, model: selectedModelId }),
       });
 
       if (!response.ok) {
@@ -52,7 +52,7 @@ const LangChainChatPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [setIsLoading]);
+  }, [setIsLoading, selectedModelId]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
