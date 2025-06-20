@@ -4,9 +4,9 @@ FROM node:20-slim
 # Set working directory
 WORKDIR /app
 
-# Install Python, pip, and git
+# Install Python, pip, git, and libmagic for python-magic
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip git --no-install-recommends && \
+    apt-get install -y python3 python3-pip git libmagic1 libmagic-dev --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy backend dependency file and install Python dependencies

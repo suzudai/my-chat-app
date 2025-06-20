@@ -17,6 +17,7 @@ static_file_dir = os.path.join(project_root, "backend/static")
 from routers import chat
 from routers import new_api
 from routers import chat_langchain
+from routers import chat_langchain_rag
 load_dotenv()
 
 app = FastAPI()
@@ -35,6 +36,7 @@ else:
 app.include_router(chat.router, prefix="/api")
 app.include_router(new_api.router, prefix="/api/new")
 app.include_router(chat_langchain.router, prefix="/api/langchain")
+app.include_router(chat_langchain_rag.router, prefix="/api/langchainchatrag")
 
 # Viteによってビルドされた静的ファイルを配信します。
 app.mount("/assets", StaticFiles(directory=os.path.join(static_file_dir, "assets")), name="assets")

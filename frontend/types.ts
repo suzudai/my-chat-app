@@ -12,3 +12,14 @@ export interface Model {
   name: string;
   disabled?: boolean;
 }
+
+export interface DocumentInfo {
+  file_name: string;
+  file_type: string;
+  source_path: string;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+}

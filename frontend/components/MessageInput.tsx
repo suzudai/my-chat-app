@@ -5,9 +5,14 @@ import LoadingSpinner from './LoadingSpinner';
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
+  placeholder?: string;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, isLoading }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ 
+  onSendMessage, 
+  isLoading, 
+  placeholder = "Type your message here..." 
+}) => {
   const [inputValue, setInputValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,7 +47,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, isLoading })
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type your message here..."
+          placeholder={placeholder}
           rows={1}
           className="flex-grow p-3 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none overflow-y-auto max-h-32 custom-scrollbar"
           disabled={isLoading}
