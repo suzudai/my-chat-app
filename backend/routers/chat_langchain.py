@@ -5,6 +5,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langsmith import Client
 import os
 from dotenv import load_dotenv
+from agents.deep_research import deep_research_agent
 from agents.langgraph_test import search_agent
 load_dotenv()
 
@@ -46,16 +47,14 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=400, detail="無効なモデルが指定されました。")
         
     try:
-        # model = ChatGoogleGenerativeAI(
-        #     model=request.model,
-        #     temperature=0.0,
-        # )
-        # prompt = client.pull_prompt("test2")
-        # messages = prompt.format_messages()
-        # messages.append(("human", request.message))
-        # response = model.invoke(messages)
-        response = search_agent(request.message)
-        print(response["messages"][-1].content)
-        return ChatResponse(reply=response["messages"][-1].content)
+        model = ChatGoogleGenerativeAI(
+            model=request.model,
+            temperature=0.0,
+        )
+        prompt = client.pull_prompt("test2")
+        messages = prompt.format_messages()
+        messages.append(("human", request.message))
+        response = model.invoke(messages)
+        return ChatResponse(reply=response.content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

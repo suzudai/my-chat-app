@@ -24,3 +24,7 @@ pnpm-lock.yaml
 .idea/
 .DS_Store
 *.swp
+
+backend/langchain/chroma_db/*
+backend/langchain/files/*
+doc/*
