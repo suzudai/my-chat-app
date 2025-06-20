@@ -69,6 +69,11 @@ const Layout: React.FC = () => {
                     </NavLink>
                 </li>
                 <li>
+                    <NavLink to="/langchain-rag" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
+                        LangChain Chat RAG
+                    </NavLink>
+                </li>
+                <li>
                     <NavLink to="/about" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
                         About
                     </NavLink>
@@ -78,6 +83,7 @@ const Layout: React.FC = () => {
                         New Page
                     </NavLink>
                 </li>
+
             </ul>
             <div className="w-64">
                 <ModelSelector

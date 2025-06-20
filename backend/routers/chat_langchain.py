@@ -4,10 +4,10 @@ from typing import List, Dict
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langsmith import Client
 import os
-from dotenv import load_dotenv
+
 from agents.deep_research import deep_research_agent
 from agents.langgraph_test import search_agent
-load_dotenv()
+
 
 client = Client(api_key=os.getenv("LANGSMITH_API_KEY"))
 

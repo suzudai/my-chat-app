@@ -829,21 +829,6 @@ def deep_research_agent(question: str, max_iterations: int = 3):
 何かご不明な点がございましたら、お気軽にお声がけください。""")
         return {"messages": [error_message]}
 
-# テスト実行
-print("Deep Research エージェントフローを実装しました。")
-print("以下の高度な機能が含まれています：")
-print("- 包括的な研究計画立案")
-print("- 多角的情報収集（最新ニュース含む）")
-print("- 専門家視点の分析")
-print("- 研究ギャップの特定")
-print("- 詳細な事実検証")
-print("- 包括的な情報統合")
-print("- 最終回答生成エージェント")
-print("- 反復的深化プロセス")
-print("- 信頼度スコアリング")
-print("- Tavilyを使った最新情報取得")
-print(f"- 最大{3}回の研究イテレーション")
-
 
 if __name__ == "__main__":
     question = "AIの未来について教えてください。"

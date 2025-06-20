@@ -12,3 +12,5 @@ chromadb
 python-docx
 python-pptx
 unstructured[pptx]
+python-magic
+python-multipart
