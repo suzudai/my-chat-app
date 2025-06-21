@@ -100,6 +100,11 @@ const Layout: React.FC = () => {
                         New Page
                     </NavLink>
                 </li>
+                <li>
+                    <NavLink to="/my-app" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
+                        My App
+                    </NavLink>
+                </li>
 
             </ul>
             <div className="w-64">
@@ -120,3 +125,4 @@ const Layout: React.FC = () => {
 };
 
 export default Layout; 
+

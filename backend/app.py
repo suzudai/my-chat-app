@@ -16,6 +16,7 @@ static_file_dir = os.path.join(project_root, "backend/static")
 # routersからchatルーターをインポート
 from routers import chat
 from routers import new_api
+from routers import my_app
 from routers import chat_langchain
 from routers import chat_langchain_rag
 load_dotenv()
@@ -35,6 +36,7 @@ else:
 # これにより、このルーター内のすべてのパスは '/api' から始まります (例: /api/chat)
 app.include_router(chat.router, prefix="/api")
 app.include_router(new_api.router, prefix="/api/new")
+app.include_router(my_app.router, prefix="/api/my-app")
 app.include_router(chat_langchain.router, prefix="/api/langchain")
 app.include_router(chat_langchain_rag.router, prefix="/api/langchainchatrag")
 
@@ -51,3 +53,4 @@ async def serve_spa(full_path: str):
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+
