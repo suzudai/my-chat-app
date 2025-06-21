@@ -25,6 +25,6 @@ pnpm-lock.yaml
 .DS_Store
 *.swp
 
-backend/langchains/chroma_db/*
-backend/langchains/files/*
+backend/langchain_rag/chroma_db/*
+backend/langchain_rag/files/*
 doc/*

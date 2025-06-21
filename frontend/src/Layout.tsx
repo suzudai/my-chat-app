@@ -25,9 +25,6 @@ const Layout: React.FC = () => {
         }
         const data: Model[] = await response.json();
         setModels(data);
-        if (data.length > 0) {
-          setSelectedModelId(data[0].id);
-        }
       } catch (error) {
         console.error("Error fetching models:", error);
         // ここでエラーハンドリングをすることもできます（例：エラーメッセージを表示）
@@ -46,6 +43,26 @@ const Layout: React.FC = () => {
     }
     return models;
   }, [models, location.pathname]);
+
+  useEffect(() => {
+    if (models.length > 0 && !selectedModelId) {
+      // 優先順位: gemini-2.5-pro > gemini-2.5-flash > gemini-1.5-flash > その他
+      const preferredOrder = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-1.5-flash"];
+      
+      let defaultModel = null;
+      for (const modelId of preferredOrder) {
+        defaultModel = models.find(model => model.id === modelId);
+        if (defaultModel) break;
+      }
+      
+      // 優先モデルが見つからない場合は最初のモデルを使用
+      if (!defaultModel) {
+        defaultModel = models[0];
+      }
+      
+      setSelectedModelId(defaultModel.id);
+    }
+  }, [models, selectedModelId]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100 font-sans">

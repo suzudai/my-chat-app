@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import List, Optional
-from langchains.langchain_rag import get_rag_flow, get_documents_list, upload_and_add_document, delete_document_from_vector_store
+from langchain_rag.langchain_rag import get_rag_flow, get_documents_list, upload_and_add_document, delete_document_from_vector_store
+from models import is_valid_model, is_valid_embedding_model, Model, get_available_models, get_available_embedding_models
 
 router = APIRouter()
 
@@ -9,6 +10,7 @@ class ChatRequest(BaseModel):
     message: str
     model: str
     selected_document: Optional[str] = None
+    embedding_model: Optional[str] = "embedding-gemini"
 
 class ChatResponse(BaseModel):
     reply: str
@@ -25,9 +27,19 @@ class ApiResponse(BaseModel):
     success: bool
     message: str
 
-class Model(BaseModel):
-    id: str
-    name: str
+@router.get("/models", response_model=List[Model])
+async def get_models():
+    """
+    利用可能なチャットモデルのリストを返します。
+    """
+    return get_available_models()
+
+@router.get("/embedding-models", response_model=List[Model])
+async def get_embedding_models():
+    """
+    利用可能なエンベディングモデルのリストを返します。
+    """
+    return get_available_embedding_models()
 
 @router.get("/documents", response_model=List[DocumentInfo])
 async def get_documents():
@@ -89,5 +101,18 @@ async def delete_document(request: DeleteDocumentRequest):
 
 @router.post("/langchain-rag-chat")
 async def langchain_rag(request: ChatRequest):
-    answer = get_rag_flow(request.message, request.selected_document)
-    return ChatResponse(reply=answer)
+    """
+    RAGを使用したチャット機能
+    """
+    if not is_valid_model(request.model):
+        raise HTTPException(status_code=400, detail="無効なチャットモデルが指定されました。")
+    
+    if request.embedding_model and not is_valid_embedding_model(request.embedding_model):
+        raise HTTPException(status_code=400, detail="無効なエンベディングモデルが指定されました。")
+    
+    try:
+        embedding_model_id = request.embedding_model or "embedding-gemini"
+        answer = get_rag_flow(request.message, request.selected_document, request.model, embedding_model_id)
+        return ChatResponse(reply=answer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
