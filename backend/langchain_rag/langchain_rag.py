@@ -3,24 +3,22 @@ import shutil
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredPowerPointLoader
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from dotenv import load_dotenv
 from langchain_text_splitters import CharacterTextSplitter
 from langchain.chains import RetrievalQA
-from langchain_google_genai import ChatGoogleGenerativeAI
+from models import get_embeddings_model, get_model_instance
+
 load_dotenv()
-
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
 
 def delete_vector_store():
     # 既にベクトルストアがあれば削除
-    if os.path.exists("/code/my-chat-app/backend/langchains/chroma_db"):
-        shutil.rmtree("/code/my-chat-app/backend/langchains/chroma_db")
+    if os.path.exists("/code/my-chat-app/backend/langchain_rag/chroma_db"):
+        shutil.rmtree("/code/my-chat-app/backend/langchain_rag/chroma_db")
 
-def load_or_create_vector_store():
+def load_or_create_vector_store(embedding_model_id="embedding-gemini"):
     # ベクトルストアを読み込むor新規作成
-    vector_store = Chroma(collection_name="my_collection", embedding_function=embeddings, persist_directory=f"/code/my-chat-app/backend/langchains/chroma_db")
+    embeddings = get_embeddings_model(embedding_model_id)
+    vector_store = Chroma(collection_name="my_collection", embedding_function=embeddings, persist_directory=f"/code/my-chat-app/backend/langchain_rag/chroma_db")
     return vector_store
 
 def get_document_loader(doc_path):
@@ -109,7 +107,7 @@ def delete_document_from_vector_store(source_path):
     except Exception as e:
         return f"エラー: ドキュメントの削除中にエラーが発生しました: {str(e)}"
 
-def save_uploaded_file(file_content, filename, upload_dir="/code/my-chat-app/backend/langchains/files"):
+def save_uploaded_file(file_content, filename, upload_dir="/code/my-chat-app/backend/langchain_rag/files"):
     """
     アップロードされたファイルを保存する
     """
@@ -198,10 +196,11 @@ def upload_and_add_document(file_content, filename):
     except Exception as e:
         return f"エラー: アップロード処理中にエラーが発生しました: {str(e)}"
 
-def vector_search_flow(vector_store, query, document_filter=None):
+def vector_search_flow(vector_store, query, document_filter=None, model_name="gemini-1.5-flash"):
     """
     ベクトル検索を実行する
     document_filter: 特定のドキュメントに絞り込む場合のフィルター
+    model_name: 使用するモデル名
     """
     # 後でベクトルストアを検索するためにretrieverを作成
     if document_filter:
@@ -212,8 +211,8 @@ def vector_search_flow(vector_store, query, document_filter=None):
     else:
         retriever = vector_store.as_retriever()
 
-    # モデルを作成
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    # 共通のモデル管理からインスタンスを取得
+    model = get_model_instance(model_name)
 
     # チェーンを作成
     qa_chain = RetrievalQA.from_chain_type(llm=model, retriever=retriever)
@@ -232,34 +231,21 @@ def get_supported_formats():
         "PowerPoint": [".pptx", ".ppt"]
     }
 
-def get_rag_flow(query, selected_document=None):
+def get_rag_flow(query, selected_document=None, model_name="gemini-1.5-flash", embedding_model_id="embedding-gemini"):
     """
     RAG機能のメインフロー
     selected_document: 特定のドキュメントに絞り込む場合のsource_path
+    model_name: 使用するモデル名
+    embedding_model_id: エンベディングモデルID (例: "embedding-gemini", "embedding-ada-002")
     """
-    vector_store = load_or_create_vector_store()
-    print("ベクトルストアを作成")
-    answer = vector_search_flow(vector_store, query, selected_document)
-    print("検索結果")
-    print(answer)
+    vector_store = load_or_create_vector_store(embedding_model_id)
+    answer = vector_search_flow(vector_store, query, selected_document, model_name)
     return answer["result"]
 
 if __name__ == "__main__":
     # ベクトルストアを作成
     vector_store = load_or_create_vector_store()
     
-    result = add_document(vector_store, "./backend/langchains/files/NIPS-2017-attention-is-all-you-need-Paper.pdf")
-    print(result)
-
-    # # 検索実行
-    # answer = vector_search_flow(vector_store, "PoBプロダクトにおけるチャット機能の分類について教えて")
-    # print(f"\n検索結果:\n{answer}")
-
-    # collection = vector_store._collection  # 内部の ChromaDB コレクションにアクセス
-    # results = collection.get()  # 全ドキュメント取得
-    # # 結果の表示
-    # for doc_id, content, metadata in zip(results["ids"], results["documents"], results["metadatas"]):
-    #     print(f"\n--- ID: {doc_id} ---")
-    #     print(f"Metadata:\n{metadata}")
+    result = add_document(vector_store, "./backend/langchain_rag/files/NIPS-2017-attention-is-all-you-need-Paper.pdf")
 
     # delete_vector_store()

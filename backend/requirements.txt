@@ -5,6 +5,8 @@ google-generativeai
 pytest
 httpx
 langchain-google-genai
+langchain-openai
+openai
 langchain
 langchain-community
 langchain-text-splitters
