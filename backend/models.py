@@ -15,10 +15,13 @@ class Model(BaseModel):
 AVAILABLE_CHAT_MODELS_DETAIL: List[Dict[str, str]] = [
     # Google/Gemini モデル
     {"id": "gemini-1.5-flash", "name": "Gemini 1.5 Flash", "provider": "google"},
-    {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"},
+    {"id": "gemini-2.0-flash-exp", "name": "Gemini 2.0 Flash Experimental", "provider": "google"},
     {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "provider": "google"},
-    {"id": "gemma-3-27b-it", "name": "Gemma 3 (37B)", "provider": "google"},
-    {"id": "gemma-3n-e4b-it", "name": "Gemma 3N (E4B)", "provider": "google"},
+    {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"},
+    
+    # Gemma モデル（正しいモデルID）
+    {"id": "gemma-3n-e4b-it", "name": "Gemma 3n E4B", "provider": "google"},
+    {"id": "gemma-3-27b-i", "name": "Gemma 3 27B", "provider": "google"},
     
     # # Azure OpenAI モデル
     # {"id": "gpt-4o", "name": "GPT-4o", "provider": "azure"},
@@ -209,37 +212,6 @@ def get_embeddings_model(embedding_model_id: str = "embedding-gemini") -> Union[
     
     return _embeddings_cache[embedding_model_id]
 
-# 便利なプリセットモデル（関数として使用）
-# Google/Gemini チャットモデル
-model_gemini_1_5_flash = lambda temp=0.0: get_model_instance("gemini-1.5-flash", temp)
-model_gemini_2_5_flash = lambda temp=0.0: get_model_instance("gemini-2.5-flash", temp)
-model_gemini_2_5_pro = lambda temp=0.0: get_model_instance("gemini-2.5-pro", temp)
-model_gemma_3_27b = lambda temp=0.0: get_model_instance("gemma-3-27b-it", temp)
-model_gemma_3n_e4b = lambda temp=0.0: get_model_instance("gemma-3n-e4b-it", temp)
-
-# Azure OpenAI チャットモデル
-model_gpt_4o = lambda temp=0.0: get_model_instance("gpt-4o", temp)
-model_gpt_4o_mini = lambda temp=0.0: get_model_instance("gpt-4o-mini", temp)
-model_gpt_4 = lambda temp=0.0: get_model_instance("gpt-4", temp)
-model_gpt_35_turbo = lambda temp=0.0: get_model_instance("gpt-35-turbo", temp)
-
-# クライアント取得用プリセット
-client_gemini_1_5_flash = lambda **kwargs: get_model_client("gemini-1.5-flash", **kwargs)
-client_gemini_2_5_flash = lambda **kwargs: get_model_client("gemini-2.5-flash", **kwargs)
-client_gemini_2_5_pro = lambda **kwargs: get_model_client("gemini-2.5-pro", **kwargs)
-client_gpt_4o = lambda **kwargs: get_model_client("gpt-4o", **kwargs)
-client_gpt_4o_mini = lambda **kwargs: get_model_client("gpt-4o-mini", **kwargs)
-client_gpt_4 = lambda **kwargs: get_model_client("gpt-4", **kwargs)
-client_gpt_35_turbo = lambda **kwargs: get_model_client("gpt-35-turbo", **kwargs)
-
-# エンベディングモデル
-model_embedding_gemini = lambda: get_embeddings_model("embedding-gemini")
-model_embedding_gemini_text = lambda: get_embeddings_model("embedding-gemini-text")
-model_embedding_ada_002 = lambda: get_embeddings_model("embedding-ada-002")
-model_embedding_3_small = lambda: get_embeddings_model("embedding-3-small")
-model_embedding_3_large = lambda: get_embeddings_model("embedding-3-large")
-
-# デフォルトモデル
-default_chat_model = lambda temp=0.0: get_model_instance("gemini-2.5-pro", temp)
-default_embedding_model = lambda: get_embeddings_model("embedding-gemini")
-default_client = lambda **kwargs: get_model_client("gemini-2.5-pro", **kwargs) 
+# デフォルトモデル設定（Gemini 1.5 Flash のクォータ制限を回避）
+DEFAULT_CHAT_MODEL_ID = "gemini-1.5-flash"  # 新しいデフォルトモデル
+DEFAULT_EMBEDDING_MODEL_ID = "embedding-gemini"

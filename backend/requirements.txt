@@ -16,3 +16,6 @@ python-pptx
 unstructured[pptx]
 python-magic
 python-multipart
+langgraph
+langgraph-checkpoint-sqlite
+msgpack

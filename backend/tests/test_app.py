@@ -2,13 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 import shutil
+import os
 
 # appモジュールをインポートするために、backendディレクトリをsys.pathに追加
 import sys
-import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import app
+from models import DEFAULT_CHAT_MODEL_ID
 
 @pytest.fixture
 def client():
@@ -51,7 +52,7 @@ def test_chat_success(client):
 def test_chat_integration(client):
     """/chatエンドポイントの統合テスト（実際にAPIを呼び出す）"""
     # /chatエンドポイントにPOSTリクエストを送信
-    response = client.post("/chat", json={"message": "こんにちは", "model": "gemini-1.5-flash"})
+    response = client.post("/chat", json={"message": "こんにちは", "model": DEFAULT_CHAT_MODEL_ID})
 
     # ステータスコードが200であることを確認
     assert response.status_code == 200

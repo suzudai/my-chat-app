@@ -35,7 +35,7 @@ const Layout: React.FC = () => {
 
   const modelsForSelector = useMemo(() => {
     if (location.pathname === '/langchain-chat') {
-      const disabledModels = ["gemma-3-27b-it", "gemma-3n-e4b-it"];
+      const disabledModels: string[] = [];
       return models.map(model => ({
         ...model,
         disabled: disabledModels.includes(model.id),
@@ -46,21 +46,7 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     if (models.length > 0 && !selectedModelId) {
-      // 優先順位: gemini-2.5-pro > gemini-2.5-flash > gemini-1.5-flash > その他
-      const preferredOrder = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-1.5-flash"];
-      
-      let defaultModel = null;
-      for (const modelId of preferredOrder) {
-        defaultModel = models.find(model => model.id === modelId);
-        if (defaultModel) break;
-      }
-      
-      // 優先モデルが見つからない場合は最初のモデルを使用
-      if (!defaultModel) {
-        defaultModel = models[0];
-      }
-      
-      setSelectedModelId(defaultModel.id);
+      setSelectedModelId(models[0].id);
     }
   }, [models, selectedModelId]);
 

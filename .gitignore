@@ -28,3 +28,5 @@ pnpm-lock.yaml
 backend/langchain_rag/chroma_db/*
 backend/langchain_rag/files/*
 doc/*
+TaskLogs/*
+backend/chathistory/sqlite/*

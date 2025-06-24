@@ -4,13 +4,20 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from dotenv import load_dotenv
 from langchain_tavily import TavilySearch
 from langchain_core.tools import tool
 import json
 import re
 from datetime import datetime
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from models import get_model_instance, DEFAULT_CHAT_MODEL_ID
+from langchain.prompts import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+from langchain.schema import OutputParserException
 
 load_dotenv()
 
@@ -33,7 +40,7 @@ class DeepResearchState(TypedDict):
 deep_research_builder = StateGraph(DeepResearchState)
 
 # LLMとツールの初期化
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
+llm = get_model_instance(DEFAULT_CHAT_MODEL_ID, temperature=0.1)
 tavily_search = TavilySearch(max_results=5)
 
 @tool

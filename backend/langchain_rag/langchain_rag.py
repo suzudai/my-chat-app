@@ -6,7 +6,9 @@ from langchain_chroma import Chroma
 from dotenv import load_dotenv
 from langchain_text_splitters import CharacterTextSplitter
 from langchain.chains import RetrievalQA
-from models import get_embeddings_model, get_model_instance
+from langchain.prompts import PromptTemplate
+from models import get_embeddings_model, get_model_instance, DEFAULT_CHAT_MODEL_ID
+from langchain_core.documents import Document
 
 load_dotenv()
 
@@ -196,7 +198,7 @@ def upload_and_add_document(file_content, filename):
     except Exception as e:
         return f"エラー: アップロード処理中にエラーが発生しました: {str(e)}"
 
-def vector_search_flow(vector_store, query, document_filter=None, model_name="gemini-1.5-flash"):
+def vector_search_flow(vector_store, query, document_filter=None, model_name=DEFAULT_CHAT_MODEL_ID):
     """
     ベクトル検索を実行する
     document_filter: 特定のドキュメントに絞り込む場合のフィルター
@@ -231,7 +233,7 @@ def get_supported_formats():
         "PowerPoint": [".pptx", ".ppt"]
     }
 
-def get_rag_flow(query, selected_document=None, model_name="gemini-1.5-flash", embedding_model_id="embedding-gemini"):
+def get_rag_flow(query, selected_document=None, model_name=DEFAULT_CHAT_MODEL_ID, embedding_model_id="embedding-gemini"):
     """
     RAG機能のメインフロー
     selected_document: 特定のドキュメントに絞り込む場合のsource_path

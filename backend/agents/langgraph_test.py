@@ -3,13 +3,18 @@ from typing import Annotated
 from langchain_google_genai import ChatGoogleGenerativeAI
 from typing_extensions import TypedDict
 
-
-from langgraph.graph import StateGraph, END
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 
 from dotenv import load_dotenv
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from models import get_model_instance, DEFAULT_CHAT_MODEL_ID
 
 load_dotenv()
 
@@ -23,7 +28,7 @@ graph_builder = StateGraph(State)
 
 # 各種ノードの定義
 # LLM
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+llm = get_model_instance(DEFAULT_CHAT_MODEL_ID)
 # ツール
 tool = TavilySearch()
 tools = [tool]
