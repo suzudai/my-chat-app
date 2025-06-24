@@ -24,7 +24,7 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({ messages, isLoading }) => {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 mb-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-3.862 8.25-8.625 8.25S3.75 16.556 3.75 12s3.862-8.25 8.625-8.25S21 7.444 21 12Z" />
             </svg>
-            <p className="text-xl">Welcome to Gemini AI Chat!</p>
+            <p className="text-xl">Welcome to AI Chat!</p>
             <p>Start by typing a message below.</p>
           </div>
         )}

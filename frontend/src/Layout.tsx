@@ -56,7 +56,7 @@ const Layout: React.FC = () => {
         <div className="flex items-center">
             <SparklesIcon className="w-8 h-8 text-blue-400 mr-3" />
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
-                <Link to="/">Gemini AI Chat</Link>
+                <Link to="/">AI Chat</Link>
             </h1>
         </div>
         <div className="flex items-center space-x-4">
