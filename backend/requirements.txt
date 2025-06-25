@@ -19,3 +19,6 @@ python-multipart
 langgraph
 langgraph-checkpoint-sqlite
 msgpack
+elasticsearch
+langchain-elasticsearch
+duckduckgo_search

@@ -57,6 +57,11 @@ def setup_session_titles_table():
     except sqlite3.OperationalError as e:
         if "duplicate column name" not in str(e):
             raise
+    try:
+        cursor.execute("ALTER TABLE session_titles ADD COLUMN category TEXT NOT NULL DEFAULT 'chat_with_history'")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" not in str(e):
+            raise
     conn.commit()
 
 
@@ -145,7 +150,7 @@ def generate_chat_title(first_user_message: str, model_id: str = DEFAULT_CHAT_MO
         # エラーが発生した場合は最初のメッセージの冒頭を使用
         return first_user_message[:27] + ("..." if len(first_user_message) > 27 else "")
 
-def save_session_title(thread_id: str, title: str):
+def save_session_title(thread_id: str, title: str, category: str = "chat_with_history"):
     """
     セッションのタイトルを保存または更新
     
@@ -155,16 +160,20 @@ def save_session_title(thread_id: str, title: str):
         セッションID
     title : str
         セッションタイトル
+    category : str, optional
+        セッションカテゴリ（デフォルト: "chat_with_history"）
+        "chat_with_history" または "chat_with_agents"
     """
     cursor = conn.cursor()
     now = datetime.now()
     cursor.execute("""
-        INSERT INTO session_titles (thread_id, title, created_at, updated_at, message_count, last_message_at)
-        VALUES (?, ?, ?, ?, 0, ?)
+        INSERT INTO session_titles (thread_id, title, created_at, updated_at, message_count, last_message_at, category)
+        VALUES (?, ?, ?, ?, 0, ?, ?)
         ON CONFLICT(thread_id) DO UPDATE SET
             title = excluded.title,
-            updated_at = ?
-    """, (thread_id, title, now, now, now, now))
+            updated_at = ?,
+            category = excluded.category
+    """, (thread_id, title, now, now, now, category, now))
     conn.commit()
 
 def get_session_title(thread_id: str) -> str | None:
@@ -193,11 +202,11 @@ def get_all_sessions() -> List[Dict[str, Any]]:
     Returns
     -------
     List[Dict[str, Any]]
-        セッション情報のリスト（thread_id, title, updated_at, message_count, last_message_at）
+        セッション情報のリスト（thread_id, title, updated_at, message_count, last_message_at, category）
     """
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT thread_id, title, updated_at, message_count, last_message_at 
+        SELECT thread_id, title, updated_at, message_count, last_message_at, category 
         FROM session_titles 
         ORDER BY last_message_at DESC, updated_at DESC
     """)
@@ -209,7 +218,43 @@ def get_all_sessions() -> List[Dict[str, Any]]:
             "title": row[1],
             "updated_at": row[2],
             "message_count": row[3],
-            "last_message_at": row[4] if row[4] else row[2] # Fallback to updated_at
+            "last_message_at": row[4] if row[4] else row[2], # Fallback to updated_at
+            "category": row[5] if row[5] else "chat_with_history"  # デフォルト値
+        })
+    
+    return sessions
+
+def get_sessions_by_category(category: str) -> List[Dict[str, Any]]:
+    """
+    指定されたカテゴリのチャットセッション一覧を取得
+    
+    Parameters
+    ----------
+    category : str
+        セッションカテゴリ（"chat_with_history" または "chat_with_agents"）
+    
+    Returns
+    -------
+    List[Dict[str, Any]]
+        セッション情報のリスト（thread_id, title, updated_at, message_count, last_message_at, category）
+    """
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT thread_id, title, updated_at, message_count, last_message_at, category 
+        FROM session_titles 
+        WHERE category = ?
+        ORDER BY last_message_at DESC, updated_at DESC
+    """, (category,))
+    
+    sessions = []
+    for row in cursor.fetchall():
+        sessions.append({
+            "thread_id": row[0],
+            "title": row[1],
+            "updated_at": row[2],
+            "message_count": row[3],
+            "last_message_at": row[4] if row[4] else row[2], # Fallback to updated_at
+            "category": row[5]
         })
     
     return sessions
@@ -289,7 +334,7 @@ def delete_session(thread_id: str) -> bool:
         print(f"セッション削除エラー: {e}")
         return False
 
-def chat_history(query: str, thread_id: str = "default", model_id: str = DEFAULT_CHAT_MODEL_ID) -> dict[str, Any]:
+def chat_history(query: str, thread_id: str = "default", model_id: str = DEFAULT_CHAT_MODEL_ID, category: str = "chat_with_history") -> dict[str, Any]:
     """
     チャット履歴を保持した会話機能
     
@@ -301,6 +346,8 @@ def chat_history(query: str, thread_id: str = "default", model_id: str = DEFAULT
         会話スレッドのID（デフォルト: "default"）
     model_id : str, optional
         使用するモデルID（デフォルト: DEFAULT_CHAT_MODEL_ID）
+    category : str, optional
+        セッションカテゴリ（デフォルト: "chat_with_history"）
     
     Returns
     -------
@@ -324,7 +371,7 @@ def chat_history(query: str, thread_id: str = "default", model_id: str = DEFAULT
     if should_generate_title and result.get("last_response"):
         try:
             title = generate_chat_title(query, model_id)
-            save_session_title(thread_id, title)
+            save_session_title(thread_id, title, category)
             result["updated_title"] = title
         except Exception as e:
             print(f"タイトル生成エラー: {e}")

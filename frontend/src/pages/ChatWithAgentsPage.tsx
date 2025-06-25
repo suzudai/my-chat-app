@@ -14,7 +14,7 @@ import ErrorMessage from '../../components/ErrorMessage';
 import ChatHistoryList from '../../components/ChatHistoryList';
 import { OutletContextProps } from '../../src/Layout';
 
-const LangChainChatPage: React.FC = () => {
+const ChatWithAgentsPage: React.FC = () => {
   const { selectedModelId, isLoading, setIsLoading } = useOutletContext<OutletContextProps>();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -23,13 +23,13 @@ const LangChainChatPage: React.FC = () => {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [sessionsLoading, setSessionsLoading] = useState<boolean>(true);
 
-  // チャット履歴セッション一覧を取得
+  // Deep Research セッション一覧を取得
   const fetchSessions = useCallback(async () => {
     try {
       setSessionsLoading(true);
-      const response = await fetch('/api/langchain/chat-sessions');
+      const response = await fetch('/api/deep-research/deep-research-sessions');
       if (!response.ok) {
-        throw new Error('Failed to fetch chat sessions');
+        throw new Error('Failed to fetch agent chat sessions');
       }
       const data: BackendChatSession[] = await response.json();
       
@@ -45,8 +45,8 @@ const LangChainChatPage: React.FC = () => {
       
       setSessions(sessionsWithDates);
     } catch (e) {
-      console.error('セッション取得エラー:', e);
-      setError('チャット履歴の取得に失敗しました');
+      console.error('エージェントチャット セッション取得エラー:', e);
+      setError('エージェントチャット セッション履歴の取得に失敗しました');
     } finally {
       setSessionsLoading(false);
     }
@@ -56,11 +56,16 @@ const LangChainChatPage: React.FC = () => {
   const fetchSessionMessages = useCallback(async (sessionId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/langchain/chat-sessions/${sessionId}/messages`);
+      console.log(`エージェントチャット: セッション ${sessionId} のメッセージを取得中...`);
+      
+      const response = await fetch(`/api/deep-research/deep-research-sessions/${sessionId}/messages`);
       if (!response.ok) {
         throw new Error('Failed to fetch session messages');
       }
       const data: BackendChatMessage[] = await response.json();
+      
+      console.log('エージェントチャット: 取得したメッセージ数:', data.length);
+      console.log('エージェントチャット: 取得したメッセージ:', data);
       
       // バックエンドデータをフロントエンド形式に変換
       const messagesWithDates = data.map((msg, index) => ({
@@ -72,6 +77,7 @@ const LangChainChatPage: React.FC = () => {
         content: msg.content
       }));
       
+      console.log('エージェントチャット: 変換後のメッセージ:', messagesWithDates);
       setMessages(messagesWithDates);
     } catch (e) {
       console.error('メッセージ取得エラー:', e);
@@ -87,6 +93,7 @@ const LangChainChatPage: React.FC = () => {
 
   // セッション選択時の処理
   const handleSessionSelect = useCallback((session: ChatHistorySession | null) => {
+    console.log('エージェントチャット: セッション選択:', session);
     if (session) {
       setSelectedSessionId(session.thread_id);
       fetchSessionMessages(session.thread_id);
@@ -100,7 +107,7 @@ const LangChainChatPage: React.FC = () => {
   // 新規セッション作成
   const handleNewSession = useCallback(async () => {
     try {
-      const response = await fetch('/api/langchain/chat-sessions', {
+      const response = await fetch('/api/deep-research/deep-research-sessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +115,7 @@ const LangChainChatPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create new session');
+        throw new Error('Failed to create new agent chat session');
       }
 
       const newSession: CreateSessionResponse = await response.json();
@@ -125,15 +132,15 @@ const LangChainChatPage: React.FC = () => {
       setMessages([]);
       setError(null);
     } catch (e) {
-      console.error('新規セッション作成エラー:', e);
-      setError('新しいチャットの作成に失敗しました');
+      console.error('新規エージェントチャットセッション作成エラー:', e);
+      setError('新しいエージェントチャットセッションの作成に失敗しました');
     }
   }, []);
 
   // セッション削除
   const handleDeleteSession = useCallback(async (sessionId: string) => {
     try {
-      const response = await fetch(`/api/langchain/chat-sessions/${sessionId}`, {
+      const response = await fetch(`/api/deep-research/deep-research-sessions/${sessionId}`, {
         method: 'DELETE',
       });
 
@@ -149,14 +156,14 @@ const LangChainChatPage: React.FC = () => {
       }
     } catch (e) {
       console.error('セッション削除エラー:', e);
-      setError('チャットの削除に失敗しました');
+      setError('セッションの削除に失敗しました');
     }
   }, [selectedSessionId]);
 
   // タイトル更新
   const handleTitleUpdate = useCallback(async (sessionId: string, newTitle: string) => {
     try {
-      const response = await fetch(`/api/langchain/chat-sessions/${sessionId}/title`, {
+      const response = await fetch(`/api/deep-research/deep-research-sessions/${sessionId}/title`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -185,7 +192,7 @@ const LangChainChatPage: React.FC = () => {
     let currentSessionId = selectedSessionId;
     if (!currentSessionId) {
       try {
-        const response = await fetch('/api/langchain/chat-sessions', {
+        const response = await fetch('/api/deep-research/deep-research-sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -206,11 +213,11 @@ const LangChainChatPage: React.FC = () => {
         };
 
         setSessions(prev => [sessionWithDates, ...prev]);
-        setSelectedSessionId(sessionWithDates.thread_id);
         currentSessionId = sessionWithDates.thread_id;
+        setSelectedSessionId(currentSessionId);
       } catch (e) {
-        console.error('新規セッション作成エラー:', e);
-        setError('新しいチャットの作成に失敗しました');
+        console.error('セッション作成エラー:', e);
+        setError('新しいセッションの作成に失敗しました');
         return;
       }
     }
@@ -226,21 +233,24 @@ const LangChainChatPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/langchain/chat-with-history', {
+      const endpoint = currentSessionId 
+        ? `/api/deep-research/deep-research-sessions/${currentSessionId}/chat`
+        : '/api/deep-research/deep-research-chat';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
           message: userInput, 
-          thread_id: currentSessionId,
-          model_id: selectedModelId
+          model: selectedModelId 
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to get response from AI');
+        throw new Error(errorData.detail || 'Failed to get response from Agent Chat');
       }
 
       const data: ChatResponse = await response.json();
@@ -250,37 +260,44 @@ const LangChainChatPage: React.FC = () => {
         text: data.reply,
         sender: 'ai',
         timestamp: new Date(),
-        sources: data.sources
       };
       setMessages(prevMessages => [...prevMessages, aiMessage]);
 
-      // メッセージ送信後にセッションリストを更新して、最終メッセージ日時を反映
-      fetchSessions();
+             // タイトルが更新された場合
+       if (data.updated_title) {
+         setSessions(prev => prev.map(session => 
+           session.thread_id === currentSessionId
+             ? { ...session, title: data.updated_title! }
+             : session
+         ));
+       }
+
+      // セッション一覧を更新（メッセージ数などの更新のため）
+      setTimeout(() => {
+        fetchSessions();
+      }, 1000);
 
     } catch (e) {
-      if (e instanceof Error) {
-        setError(e.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+      const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSessionId, setIsLoading, selectedModelId, fetchSessions]);
+  }, [selectedSessionId, selectedModelId, setIsLoading, fetchSessions]);
 
   const selectedSession = sessions.find(session => session.thread_id === selectedSessionId);
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* 左側のチャット履歴一覧 */}
+      {/* 左側のセッション履歴 */}
       <div className="w-80 flex-shrink-0 p-4 border-r border-gray-700 overflow-y-auto">
         <ChatHistoryList
           sessions={sessions}
           selectedSessionId={selectedSessionId}
           onSessionSelect={handleSessionSelect}
-          onNewSession={handleNewSession}
           onDeleteSession={handleDeleteSession}
           onTitleUpdate={handleTitleUpdate}
+          onNewSession={handleNewSession}
           isLoading={sessionsLoading}
         />
       </div>
@@ -289,8 +306,8 @@ const LangChainChatPage: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 選択中のセッション表示 */}
         {selectedSession && (
-          <div className="bg-blue-900 p-3 border-b border-gray-700">
-            <div className="text-sm text-blue-200">
+          <div className="bg-purple-900 p-3 border-b border-gray-700">
+            <div className="text-sm text-purple-200">
               選択中のチャット: <span className="font-medium">{selectedSession.title}</span>
             </div>
           </div>
@@ -320,4 +337,4 @@ const LangChainChatPage: React.FC = () => {
   );
 };
 
-export default LangChainChatPage; 
+export default ChatWithAgentsPage; 

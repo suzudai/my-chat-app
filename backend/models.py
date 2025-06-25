@@ -15,13 +15,18 @@ class Model(BaseModel):
 AVAILABLE_CHAT_MODELS_DETAIL: List[Dict[str, str]] = [
     # Google/Gemini モデル
     {"id": "gemini-1.5-flash", "name": "Gemini 1.5 Flash", "provider": "google"},
+    {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "provider": "google"},
     {"id": "gemini-2.0-flash-exp", "name": "Gemini 2.0 Flash Experimental", "provider": "google"},
-    {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "provider": "google"},
+    {"id": "gemini-2.0-flash-lite", "name": "Gemini 2.0 Flash Lite Preview", "provider": "google"},
     {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"},
+    # {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "provider": "google"}, 利用不可
+    {"id": "gemma-3n-e4b-it", "name": "Gemma 3n E4B", "provider": "google"},
+
+
     
     # Gemma モデル（正しいモデルID）
-    {"id": "gemma-3n-e4b-it", "name": "Gemma 3n E4B", "provider": "google"},
-    {"id": "gemma-3-27b-i", "name": "Gemma 3 27B", "provider": "google"},
+    # {"id": "gemma-3n-e4b-it", "name": "Gemma 3n E4B", "provider": "google"},
+    # {"id": "gemma-3-27b-i", "name": "Gemma 3 27B", "provider": "google"},
     
     # # Azure OpenAI モデル
     # {"id": "gpt-4o", "name": "GPT-4o", "provider": "azure"},
@@ -213,5 +218,5 @@ def get_embeddings_model(embedding_model_id: str = "embedding-gemini") -> Union[
     return _embeddings_cache[embedding_model_id]
 
 # デフォルトモデル設定（Gemini 1.5 Flash のクォータ制限を回避）
-DEFAULT_CHAT_MODEL_ID = "gemini-1.5-flash"  # 新しいデフォルトモデル
+DEFAULT_CHAT_MODEL_ID = "gemini-2.0-flash-exp"  # 新しいデフォルトモデル
 DEFAULT_EMBEDDING_MODEL_ID = "embedding-gemini"

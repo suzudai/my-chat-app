@@ -1,9 +1,17 @@
+"""
+注意: このファイルは旧バージョンのTavily検索を使用したテストファイルです。
+現在はElasticsearchベースの検索に移行しているため、deep_research.pyを参照してください。
+"""
+
 from typing import Annotated
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from typing_extensions import TypedDict
 
-from langchain_community.tools.tavily_search import TavilySearchResults
+# 注意: 以下のTavilyインポートは非推奨です
+# from langchain_community.tools.tavily_search import TavilySearchResults
+# from langchain_tavily import TavilySearch
+
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
@@ -18,7 +26,7 @@ from models import get_model_instance, DEFAULT_CHAT_MODEL_ID
 
 load_dotenv()
 
-from langchain_tavily import TavilySearch
+# 注意: Tavilyは非推奨、Elasticsearchベースのdeep_research.pyを使用してください
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -29,18 +37,20 @@ graph_builder = StateGraph(State)
 # 各種ノードの定義
 # LLM
 llm = get_model_instance(DEFAULT_CHAT_MODEL_ID)
-# ツール
-tool = TavilySearch()
-tools = [tool]
+# ツール（注意: Tavilyは非推奨）
+# tool = TavilySearch()
+# tools = [tool]
+tools = []  # 空のツールリスト
 # LLMにツールを追加
 llm_with_tools = llm.bind_tools(tools)
 
 
 
-# 検索チャットノード
+# 検索チャットノード（注意: 現在は検索機能が無効化されています）
 def search_node(state: State):
     system_prompt = """
-    あなたは検索アシスタントです。query_nodeからのクエリに対して、Tavily検索を行い、検索結果を返してください。
+    注意: このテストファイルは旧バージョンです。Elasticsearch検索を使用する場合は、
+    deep_research.pyのweb_searchまたはnews_search機能を使用してください。
     """
     messages_with_prompt = [{"role": "system", "content": system_prompt}] + state["messages"]
     return {"messages": [llm_with_tools.invoke(messages_with_prompt)]}
@@ -48,14 +58,14 @@ def search_node(state: State):
 # 回答チャットノード
 def answer_node(state: State):
     system_prompt = """
-    あなたは回答生成アシスタントです。ユーザからの質問に対して、Tavily検索結果を元に回答を生成してください。
-    出力形式はマークダウン形式で出力してください。
-    引用元の記載にはURLのリンクもマークダウン形式で付与してください。
+    注意: このテストファイルは旧バージョンです。
+    現在はElasticsearchベースの検索に移行しています。
+    deep_research.pyを使用してください。
     """
     messages_with_prompt = [{"role": "system", "content": system_prompt}] + state["messages"]
     return {"messages": [llm.invoke(messages_with_prompt)]}
 
-tool_node = ToolNode(tools=[tool])
+tool_node = ToolNode(tools=tools)  # 空のツールリスト
 
 # The first argument is the unique node name
 # The second argument is the function or object that will be called whenever

@@ -7,7 +7,7 @@ import ErrorMessage from '../../components/ErrorMessage';
 import DocumentList from '../../components/DocumentList';
 import { OutletContextProps } from '../../src/Layout';
 
-const LangChainChatRagPage: React.FC = () => {
+const ChatWithRagPage: React.FC = () => {
   const { selectedModelId, isLoading, setIsLoading } = useOutletContext<OutletContextProps>();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -142,4 +142,4 @@ const LangChainChatRagPage: React.FC = () => {
   );
 };
 
-export default LangChainChatRagPage; 
+export default ChatWithRagPage; 

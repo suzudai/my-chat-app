@@ -14,10 +14,11 @@ project_root = os.path.dirname(current_dir)
 static_file_dir = os.path.join(project_root, "backend/static")
 
 # routersからchatルーターをインポート
-from routers import chat
+from routers import simple_chat
 from routers import new_api
-from routers import chat_langchain
-from routers import chat_langchain_rag
+from routers import chat_with_history
+from routers import chat_with_rag
+from routers import chat_with_agents
 load_dotenv()
 
 app = FastAPI()
@@ -33,10 +34,11 @@ else:
 
 # APIルーターをインクルードします。 '/api' というプレフィックスが付きます。
 # これにより、このルーター内のすべてのパスは '/api' から始まります (例: /api/chat)
-app.include_router(chat.router, prefix="/api")
+app.include_router(simple_chat.router, prefix="/api")
 app.include_router(new_api.router, prefix="/api/new")
-app.include_router(chat_langchain.router, prefix="/api/langchain")
-app.include_router(chat_langchain_rag.router, prefix="/api/langchainchatrag")
+app.include_router(chat_with_history.router, prefix="/api/langchain")
+app.include_router(chat_with_rag.router, prefix="/api/langchainchatrag")
+app.include_router(chat_with_agents.router, prefix="/api/deep-research")
 
 # Viteによってビルドされた静的ファイルを配信します。
 app.mount("/assets", StaticFiles(directory=os.path.join(static_file_dir, "assets")), name="assets")

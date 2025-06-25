@@ -63,17 +63,22 @@ const Layout: React.FC = () => {
             <ul className="flex space-x-4 items-center">
                 <li>
                     <NavLink to="/" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`} end>
-                        Chat
+                        Simple Chat
                     </NavLink>
                 </li>
                 <li>
                     <NavLink to="/langchain-chat" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
-                        LangChain Chat
+                        Chat with History
                     </NavLink>
                 </li>
                 <li>
                     <NavLink to="/langchain-rag" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
-                        LangChain Chat RAG
+                        Chat with RAG
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink to="/deep-research" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
+                        Chat with Agents
                     </NavLink>
                 </li>
                 <li>

@@ -8,14 +8,14 @@ import uuid
 import msgpack
 from datetime import datetime
 
-from agents.deep_research import deep_research_agent
-from agents.langgraph_test import search_agent
+
 from models import get_available_models, is_valid_model, Model, get_model_instance, get_available_embedding_models, DEFAULT_CHAT_MODEL_ID
 from chathistory.langgraph_chathistory import (
     chat_history, 
     get_session_title, 
     save_session_title,
     get_all_sessions,
+    get_sessions_by_category,
     get_messages_for_session,
     delete_session
 )
@@ -106,8 +106,8 @@ async def chat_with_history(request: ChatWithHistoryRequest):
         if not is_valid_model(request.model_id):
             raise HTTPException(status_code=400, detail="無効なモデルが指定されました。")
         
-        # チャット履歴機能を呼び出し（モデルIDを渡す）
-        result = chat_history(request.message, request.thread_id, request.model_id)
+        # チャット履歴機能を呼び出し（モデルIDとカテゴリを渡す）
+        result = chat_history(request.message, request.thread_id, request.model_id, "chat_with_history")
         
         response = ChatWithHistoryResponse(
             reply=result.get("last_response", ""),
@@ -124,10 +124,10 @@ async def chat_with_history(request: ChatWithHistoryRequest):
 @router.get("/chat-sessions", response_model=List[ChatSession])
 async def get_chat_sessions():
     """
-    全チャットセッションの一覧を取得します。
+    Chat with Historyカテゴリのチャットセッション一覧を取得します。
     """
     try:
-        sessions = get_all_sessions()
+        sessions = get_sessions_by_category("chat_with_history")
         return [
             ChatSession(
                 thread_id=session["thread_id"],
@@ -187,8 +187,8 @@ async def update_session_title(session_id: str, request: UpdateTitleRequest):
         if len(request.title) > 100:
             raise HTTPException(status_code=400, detail="タイトルが長すぎます（100文字以内）")
         
-        # タイトルを保存
-        save_session_title(session_id, request.title.strip())
+        # タイトルを保存（Chat with Historyカテゴリ）
+        save_session_title(session_id, request.title.strip(), "chat_with_history")
         
         return {"message": "タイトルが更新されました", "title": request.title.strip()}
     except HTTPException:
@@ -221,9 +221,9 @@ async def create_chat_session():
         # 新しいUUIDを生成
         new_thread_id = str(uuid.uuid4())
         
-        # 初期タイトルを設定
+        # 初期タイトルを設定（Chat with Historyカテゴリ）
         initial_title = "チャットを開始中..."
-        save_session_title(new_thread_id, initial_title)
+        save_session_title(new_thread_id, initial_title, "chat_with_history")
         
         return {
             "thread_id": new_thread_id,
@@ -233,36 +233,4 @@ async def create_chat_session():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"セッション作成エラー: {str(e)}")
 
-@router.post("/deep-research", response_model=ChatResponse)
-async def deep_research(request: ChatRequest):
-    """
-    Deep Research Agent を使用した詳細な調査機能
-    """
-    if not is_valid_model(request.model):
-        raise HTTPException(status_code=400, detail="無効なモデルが指定されました。")
-    
-    try:
-        # 共通のモデル管理からインスタンスを取得
-        model = get_model_instance(request.model)
-        
-        response = deep_research_agent(request.message, model)
-        return ChatResponse(reply=response)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/search", response_model=ChatResponse)
-async def search(request: ChatRequest):
-    """
-    Search Agent を使用した検索機能
-    """
-    if not is_valid_model(request.model):
-        raise HTTPException(status_code=400, detail="無効なモデルが指定されました。")
-    
-    try:
-        # 共通のモデル管理からインスタンスを取得
-        model = get_model_instance(request.model)
-        
-        response = search_agent(request.message, model)
-        return ChatResponse(reply=response)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+ 

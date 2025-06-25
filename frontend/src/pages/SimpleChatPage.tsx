@@ -6,7 +6,7 @@ import MessageInput from '../../components/MessageInput';
 import ErrorMessage from '../../components/ErrorMessage';
 import { OutletContextProps } from '../../src/Layout';
 
-const HomePage: React.FC = () => {
+const SimpleChatPage: React.FC = () => {
   const { selectedModelId, isLoading, setIsLoading } = useOutletContext<OutletContextProps>();
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -71,4 +71,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage; 
+export default SimpleChatPage; 
