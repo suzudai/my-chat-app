@@ -118,11 +118,17 @@ def web_search(query: str) -> str:
                 formatted_results = []
                 for hit in hits:
                     source = hit.get('_source', {})
+                    title = source.get('title', 'N/A')
+                    content = source.get('content', source.get('description', 'N/A'))
+                    url = source.get('url', 'N/A')
+                    score = hit.get('_score', 'N/A')
+                    
                     formatted_results.append(
-                        f"タイトル: {source.get('title', 'N/A')}\n"
-                        f"内容: {source.get('content', source.get('description', 'N/A'))}\n"
-                        f"URL: {source.get('url', 'N/A')}\n"
-                        f"スコア: {hit.get('_score', 'N/A')}"
+                        f"【検索結果】\n"
+                        f"タイトル: {title}\n"
+                        f"内容: {content}\n"
+                        f"参考URL: {url}\n"
+                        f"スコア: {score}"
                     )
                 return f"Elasticsearch検索結果 ({len(hits)}件):\n" + "\n---\n".join(formatted_results)
             else:
@@ -139,7 +145,9 @@ def _fallback_web_search(query: str) -> str:
     """フォールバック用のWeb検索（DuckDuckGo使用）"""
     try:
         results = ddg_search.run(query)
-        return f"Web検索結果（DuckDuckGo）:\n{results}"
+        # DuckDuckGoの結果に統一性を持たせるため、結果を構造化
+        formatted_result = f"【DuckDuckGo検索結果】\n内容: {results}\n参考URL: DuckDuckGoより取得（複数のソースを含む）"
+        return f"Web検索結果（DuckDuckGo）:\n{formatted_result}"
     except Exception as e:
         return f"検索エラー: {str(e)}。代替情報をご確認ください。"
 
@@ -193,11 +201,17 @@ def news_search(topic: str) -> str:
                 formatted_results = []
                 for hit in hits:
                     source = hit.get('_source', {})
+                    title = source.get('title', 'N/A')
+                    content = source.get('content', source.get('description', 'N/A'))
+                    url = source.get('url', 'N/A')
+                    timestamp = source.get('timestamp', 'N/A')
+                    
                     formatted_results.append(
-                        f"タイトル: {source.get('title', 'N/A')}\n"
-                        f"内容: {source.get('content', source.get('description', 'N/A'))}\n"
-                        f"URL: {source.get('url', 'N/A')}\n"
-                        f"日時: {source.get('timestamp', 'N/A')}"
+                        f"【ニュース結果】\n"
+                        f"タイトル: {title}\n"
+                        f"内容: {content}\n"
+                        f"参考URL: {url}\n"
+                        f"日時: {timestamp}"
                     )
                 return f"Elasticsearchニュース検索結果 ({len(hits)}件):\n" + "\n---\n".join(formatted_results)
             else:
@@ -212,7 +226,9 @@ def _fallback_news_search(query: str) -> str:
     """フォールバック用のニュース検索（DuckDuckGo使用）"""
     try:
         results = ddg_search.run(query)
-        return f"ニュース検索結果（DuckDuckGo）:\n{results}"
+        # DuckDuckGoの結果に統一性を持たせるため、結果を構造化
+        formatted_result = f"【DuckDuckGoニュース結果】\n内容: {results}\n参考URL: DuckDuckGoより取得（複数のソースを含む）"
+        return f"ニュース検索結果（DuckDuckGo）:\n{formatted_result}"
     except Exception as e:
         return f"ニュース検索エラー: {str(e)}"
 
@@ -303,6 +319,17 @@ def final_answer_node(state: DeepResearchState):
     ## ⚡ 重要ポイント
     > 覚えておくべき核心的な要点
 
+    ## 📚 参考資料
+    検索結果から取得した情報源をマークダウンリンク形式で記載してください：
+    - [参考資料1のタイトル](URL1)
+    - [参考資料2のタイトル](URL2)
+    - [参考資料3のタイトル](URL3)
+
+    **注意事項**:
+    - 検索結果に含まれるURLは必ずマークダウンリンク形式で参考資料セクションに含めてください
+    - URLが「N/A」でない場合のみリンクとして表示してください
+    - 情報の信頼性を高めるため、可能な限り複数の参考資料を含めてください
+    
     読みやすく、実用的な情報を提供してください。
     """
     
@@ -311,7 +338,7 @@ def final_answer_node(state: DeepResearchState):
     
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"質問: {state['original_query']}\n\n以下の調査・分析結果を基に、マークダウン形式で最終回答を作成してください。")
+        HumanMessage(content=f"質問: {state['original_query']}\n\n以下の調査・分析結果を基に、マークダウン形式で最終回答を作成してください。検索結果に含まれるURLは必ず「## 📚 参考資料」セクションにマークダウンリンク形式で含めてください。")
     ] + recent_messages
     
     try:
