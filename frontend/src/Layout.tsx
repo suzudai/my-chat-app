@@ -82,6 +82,11 @@ const Layout: React.FC = () => {
                     </NavLink>
                 </li>
                 <li>
+                    <NavLink to="/voting-graph" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
+                        Voting Graph
+                    </NavLink>
+                </li>
+                <li>
                     <NavLink to="/about" className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
                         About
                     </NavLink>

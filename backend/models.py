@@ -21,6 +21,7 @@ AVAILABLE_CHAT_MODELS_DETAIL: List[Dict[str, str]] = [
     {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"},
     # {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "provider": "google"}, 利用不可
     {"id": "gemma-3n-e4b-it", "name": "Gemma 3n E4B", "provider": "google"},
+    {"id": "gemma-3n-e2b-it", "name": "Gemma 3n E2B", "provider": "google"},
 
 
     

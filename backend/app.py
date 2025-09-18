@@ -19,6 +19,7 @@ from routers import new_api
 from routers import chat_with_history
 from routers import chat_with_rag
 from routers import chat_with_agents
+from routers import voting_graph
 load_dotenv()
 
 app = FastAPI()
@@ -39,6 +40,7 @@ app.include_router(new_api.router, prefix="/api/new")
 app.include_router(chat_with_history.router, prefix="/api/langchain")
 app.include_router(chat_with_rag.router, prefix="/api/langchainchatrag")
 app.include_router(chat_with_agents.router, prefix="/api/deep-research")
+app.include_router(voting_graph.router, prefix="/api/voting-graph")
 
 # Viteによってビルドされた静的ファイルを配信します。
 app.mount("/assets", StaticFiles(directory=os.path.join(static_file_dir, "assets")), name="assets")

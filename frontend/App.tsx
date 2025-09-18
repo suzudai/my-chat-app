@@ -7,6 +7,7 @@ import NewPage from './src/pages/NewPage';
 import ChatWithHistoryPage from './src/pages/ChatWithHistoryPage';
 import ChatWithRagPage from './src/pages/ChatWithRagPage';
 import ChatWithAgentsPage from './src/pages/ChatWithAgentsPage';
+import VotingGraphPage from './src/pages/VotingGraphPage';
 import Layout from './src/Layout';
 
 const App: React.FC = () => {
@@ -20,6 +21,7 @@ const App: React.FC = () => {
           <Route path="langchain-chat" element={<ChatWithHistoryPage />} />
           <Route path="langchain-rag" element={<ChatWithRagPage />} />
           <Route path="deep-research" element={<ChatWithAgentsPage />} />
+          <Route path="voting-graph" element={<VotingGraphPage />} />
         </Route>
       </Routes>
     </Router>
