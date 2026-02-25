@@ -30,7 +30,11 @@ class State(BaseModel):
     request_model_id: str = Field(default="", description="リクエストごとのモデルID")
 
 
-conn = sqlite3.connect("/code/my-chat-app/backend/chathistory/sqlite/chathistory.db", check_same_thread=False)
+db_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sqlite")
+os.makedirs(db_dir, exist_ok=True)
+db_path = os.path.join(db_dir, "chathistory.db")
+
+conn = sqlite3.connect(db_path, check_same_thread=False)
 checkpointer = SqliteSaver(conn)
 # データベーステーブルを初期化
 checkpointer.setup()
