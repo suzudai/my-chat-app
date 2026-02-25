@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+import importlib
 import os
 import google.generativeai as genai
 import uvicorn
@@ -13,37 +14,39 @@ project_root = os.path.dirname(current_dir)
 # 静的ファイルディレクトリのパスを作成
 static_file_dir = os.path.join(project_root, "backend/static")
 
-# routersからchatルーターをインポート
-from routers import simple_chat
-from routers import new_api
-from routers import chat_with_history
-from routers import chat_with_rag
-from routers import chat_with_agents
-from routers import voting_graph
 load_dotenv()
 
 app = FastAPI()
 
 # 環境変数 GEMINI_API_KEY を設定
-# この設定はアプリケーションの起動時に一度だけ行われるべきです。
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    # APIキーがない場合はエラーメッセージを出力するか、アプリケーションを終了するのが望ましい
     print("警告: 環境変数 'GEMINI_API_KEY' が設定されていません。")
 else:
     genai.configure(api_key=api_key)
 
-# APIルーターをインクルードします。 '/api' というプレフィックスが付きます。
-# これにより、このルーター内のすべてのパスは '/api' から始まります (例: /api/chat)
-app.include_router(simple_chat.router, prefix="/api")
-app.include_router(new_api.router, prefix="/api/new")
-app.include_router(chat_with_history.router, prefix="/api/langchain")
-app.include_router(chat_with_rag.router, prefix="/api/langchainchatrag")
-app.include_router(chat_with_agents.router, prefix="/api/deep-research")
-app.include_router(voting_graph.router, prefix="/api/voting-graph")
+
+def include_router_if_available(module_name: str, prefix: str = "/api") -> None:
+    """依存関係が揃っているルーターのみを安全に読み込む。"""
+    try:
+        module = importlib.import_module(f"routers.{module_name}")
+        app.include_router(module.router, prefix=prefix)
+    except Exception as e:
+        print(f"警告: routers.{module_name} の読み込みをスキップしました: {e}")
+
+
+# APIルーターをインクルード
+include_router_if_available("simple_chat", "/api")
+include_router_if_available("new_api", "/api/new")
+include_router_if_available("chat_with_history", "/api/langchain")
+include_router_if_available("chat_with_rag", "/api/langchainchatrag")
+include_router_if_available("chat_with_agents", "/api/deep-research")
+include_router_if_available("voting_graph", "/api/voting-graph")
 
 # Viteによってビルドされた静的ファイルを配信します。
+os.makedirs(os.path.join(static_file_dir, "assets"), exist_ok=True)
 app.mount("/assets", StaticFiles(directory=os.path.join(static_file_dir, "assets")), name="assets")
+
 
 # SPA (Single Page Application) のためのキャッチオールルート
 @app.get("/{full_path:path}")
@@ -52,6 +55,7 @@ async def serve_spa(full_path: str):
     フロントエンドアプリケーションをホストするためのフォールバック。
     """
     return FileResponse(os.path.join(static_file_dir, "index.html"))
+
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
